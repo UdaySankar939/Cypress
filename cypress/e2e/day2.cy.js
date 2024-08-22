@@ -12,11 +12,3 @@ describe('template spec', () => {
   })
 })
 
-
-echo "# Cypress" >> README.md
-git init
-git add README.md
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/UdaySankar939/Cypress.git
-git push -u origin main
