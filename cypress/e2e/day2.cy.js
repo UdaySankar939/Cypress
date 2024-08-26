@@ -11,4 +11,3 @@ describe('template spec', () => {
     cy.get("a[title='MovieRulz Home']").click();
   })
 })
-
