@@ -1,0 +1,576 @@
+// /*
+// User Registration
+// ◦ Test user registration with valid and invalid inputs
+// ◦ Verify successful registration and email confirmation
+// */
+
+require('dotenv').config();
+describe('CAPSTONE PROJECT', () => {
+
+  it('New User Registration', () => {
+    cy.visit("https://demowebshop.tricentis.com/login");
+    cy.xpath("//input[@value='Register']").should("be.visible").click();
+    cy.get("div[class='center-2'] form").should("be.visible");
+    cy.get("#gender-male").check().should("be.checked");
+    cy.xpath("//input[@id='FirstName']").type("Uday Sankar").should("have.value", "Uday Sankar");
+    cy.get("#LastName").type("Daniboyina").should("have.value", "Daniboyina");
+    cy.xpath("//input[@id='Email']").type("Uday9398084451@gmail.com");
+// Password
+    cy.get("#Password").should("be.visible").and("exist").type("Uday1211@");
+    cy.xpath("//input[@id='ConfirmPassword']").should("be.visible").and("exist").type("Uday1211@");
+    cy.xpath("//input[@id='register-button']").click();
+    
+    cy.xpath("//div[@class='result']").should("be.visible");
+    cy.get(".result").should("contain","Your registration completed");
+    cy.get("input[value='Continue']").click();
+    cy.wait(3000)
+    cy.xpath("//a[normalize-space()='Log out']").click();
+
+  });
+
+
+  it(' Existing User Registration ', () => {
+    cy.visit("https://demowebshop.tricentis.com/login");
+    cy.xpath("//input[@value='Register']").should("be.visible");   
+    cy.xpath("//input[@value='Register']").click();
+    cy.get("div[class='center-2'] form").should("be.visible");
+    cy.get("#gender-male").check().should("be.checked");
+    cy.xpath("//input[@id='FirstName']").type("Uday Sankar").should("have.value","Uday Sankar");
+    cy.get("#LastName").type("Daniboyina").should("have.value","Daniboyina");
+    cy.xpath("//input[@id='Email']").type(Cypress.env('user'))
+    cy.xpath("//input[@id='register-button']").click();
+
+    //  Set Password
+    cy.get("#Password").should("be.visible").and("exist");
+    cy.get("#Password").type(Cypress.env('pass'))
+    cy.xpath(" //input[@id='ConfirmPassword']").type(Cypress.env('pass'))
+    cy.xpath("//input[@id='register-button']").click();
+
+   // The email is already existed. So it is showing as already existed
+   cy.xpath("//li[normalize-space()='The specified email already exists']").should("be.visible")
+   .then(visible => {
+    if (visible) {
+      cy.log('The Email is already exist, Please register with new Email')
+    } else {
+      cy.log('Successfully Registered')
+    }
+  })
+  })
+
+
+/*  User Login/Logout
+◦ Test login functionality with valid and invalid credentials
+◦ Test logout functionality
+*/
+
+it('Checking Visibilities in Log In page', () => {
+
+  cy.visit('https://demowebshop.tricentis.com/')
+  cy.wait(1000);
+  cy.xpath("//a[normalize-space()='Log in']").click();
+  cy.get("label[for='Email']").should("be.visible");
+  cy.get("label[for='Password']").should("be.visible");
+  cy.get("a[href='/passwordrecovery']").should("be.visible");
+  cy.get(" input[value='Log in']").should("be.visible");
+})
+
+it("Forgot Password",()=>{
+  
+cy.xpath("//a[normalize-space()='Forgot password?']").should("be.visible");
+cy.xpath("//a[normalize-space()='Forgot password?']").click();
+cy.get("div[class='page-title'] h1").should("be.visible");
+cy.get("label[for='Email']").type(Cypress.env('user'));
+cy.xpath("//input[@name='send-email']").click();
+cy.xpath("//div[@class='result']").should("be.visible")
+})
+
+
+it("Login with incorrect, correct login credentials and Logout", () => {
+cy.visit('https://demowebshop.tricentis.com/login')
+
+// Login with incorrect and correct credentials
+
+cy.xpath("//input[@id='Email']").type("udaysankar20001112@gmail.com")
+cy.get("#Password").type(Cypress.env('pass'));
+cy.login()
+
+cy.url().then(url => {
+  if (url.includes('login')) {
+    // If login fails, try with correct credentials
+    cy.xpath("//input[@id='Email']").clear().type(Cypress.env('user'))
+    cy.get("#Password").clear().type(Cypress.env('pass'))
+    cy.xpath("//input[@id='RememberMe']").check().should("be.checked");
+    cy.login()
+    cy.url().should('not.include', 'login') // should be redirected to another page
+    console.log("Login Successful")
+  } else {
+    console.log("Login Successful with first attempt")
+  }
+})
+})
+
+
+
+
+
+
+// /* Homepage Navigation
+// ◦ Verify that the homepage loads correctly
+// ◦ Check that product categories are displayed
+// */
+
+
+it("Home Page Logo",()=>{
+
+  // checking weather the logo redirecting to home page or not
+  cy.xpath("//img[@alt='Tricentis Demo Web Shop']").should("be.visible");
+  cy.get("body > div:nth-child(4) > div:nth-child(1) > div:nth-child(3) > ul:nth-child(1) > li:nth-child(1)").click();
+  cy.wait(2000)
+  cy.xpath("//img[@alt='Tricentis Demo Web Shop']").click();
+  cy.wait(2000)
+  })
+  
+
+it('Checking page title and url', () => {
+
+  //url validation
+  cy.url().should("eq","https://demowebshop.tricentis.com/");
+  cy.url().should('not.include','saucesdemo')
+  .and('not.eq','https://www.saucedemos.com/v1/')
+  .and('not.contain','Demo');
+
+  //title validation
+  cy.title().should("eq","Demo Web Shop")
+  .and('contain','Demo')
+  .and('not.include','demo web shop');
+})
+  
+  it("Checking Categories",()=>{
+  
+  //cy.visit("https://demowebshop.tricentis.com/")
+    cy.xpath("//ul[@class='top-menu']").should("be.visible")
+    .find('li').should('have.length', 12)
+  
+    // finding all categories
+  
+    cy.get('.top-menu li a').each(($item, index) => {
+      const categoryName = $item.text().trim()
+      switch (index) {
+        case 0:
+          expect(categoryName).to.eq('Books')
+          break
+        case 1:
+          expect(categoryName).to.eq('Computers')
+          break
+        case 2:
+          expect(categoryName).to.eq('Desktops')
+          break
+        case 3:
+          expect(categoryName).to.eq('Notebooks')
+          break
+        case 4:
+          expect(categoryName).to.eq('Accessories')
+          break
+        case 5:
+          expect(categoryName).to.eq('Electronics')
+          break
+        case 6:
+          expect(categoryName).to.eq('Camera, photo')
+          break
+        case 7:
+          expect(categoryName).to.eq('Cell phones')
+          break
+        case 8:
+          expect(categoryName).to.eq('Apparel & Shoes')
+          break
+        case 9:
+          expect(categoryName).to.eq('Digital downloads')
+          break
+        case 10:
+          expect(categoryName).to.eq('Jewelry')
+          break
+        case 11:
+          expect(categoryName).to.eq('Gift Cards')
+          break
+      }
+    })
+  })
+  
+
+  it("Search bar and Footer", () => {
+    // Inspecting Search Bar
+    //cy.visit("https://demowebshop.tricentis.com/")
+    cy.xpath("//input[@id='small-searchterms']").should("be.visible")
+      .and("be.enabled").and("be.empty").and("exist");
+  
+    // Inspecting Footer
+    cy.xpath("//div[@class='footer']").should("be.visible");
+    cy.xpath("//div[@class='footer']").within(() => {
+      cy.xpath("//a[contains(text(),'About us')]").should("be.visible").and('exist');
+      cy.xpath("//a[contains(text(),'Contact us')]").should("be.visible").and('exist');
+      cy.xpath("//a[contains(text(),'Blog')]").should("be.visible").and('exist');
+      cy.xpath("//a[contains(text(),'My account')]").should("be.visible").and('exist');
+      cy.xpath("//a[contains(text(),'Orders')]").should("be.visible").and('exist');
+      cy.xpath("//a[contains(text(),'YouTube')]").should("be.visible").and('exist');
+      // Add more footer elements as needed
+    });
+  });
+   
+  
+  
+  it("Header Inspection", () => {
+    //cy.visit("https://demowebshop.tricentis.com/")
+    cy.get('.header-links-wrapper').within(() => {
+      // User email (not present in this demo website)
+      cy.get("div[class='header-links'] a[class='account']").should('contain', (Cypress.env('user')));
+  
+      // Logout option (only visible after login)
+      cy.get('a[href="/logout"]').should('be.visible');
+  
+      // Cart
+      cy.get('a[href="/cart"]').should('be.visible').and('contain', 'Shopping cart');
+  
+      // Wishlist (only visible after login)
+      cy.get('a[href="/wishlist"]').should('be.visible');
+    })
+  })
+
+
+
+//   /*
+// Product Search
+// ◦ Test the search functionality for various product queries
+// ◦ Verify search results
+// */
+
+
+
+it("Product Search",()=>{
+
+  // Search for Computer
+    cy.searchProduct("Computer");
+    cy.wait(2000)
+    cy.get('.product-grid .product-item').its('length').should('be.gt', 0)
+
+
+  // Search for "Bracelet"
+  cy.searchProduct("Computer");
+  cy.wait(2000)
+  cy.get('.product-grid .product-item').its('length').should('be.gt', 0)
+
+  // Search for "Phone"
+  cy.searchProduct("Phone");
+  cy.wait(2000)
+  cy.get('.product-grid .product-item').its('length').should('be.gt', 0)
+
+
+   // Search for "Gift Card"
+   cy.searchProduct("Gift Card");
+   cy.wait(2000)
+   cy.get('.product-grid .product-item').its('length').should('be.gt', 0)
+  })
+
+
+  it("Searching a Non-Existent Product",()=>{
+
+// Searching Non-existent Product
+   cy.searchProduct("Fan");
+   cy.wait(2000)
+   cy.xpath("//strong[@class='result']").should("be.visible")
+  })
+
+
+   it("Searching an Existent product by using ' ' ",()=>{
+
+   // Searching an Existent product by using ""
+   
+   cy.searchProduct("'Phone'");
+   cy.wait(2000)
+   cy.xpath("//strong[@class='result']").should("be.visible")
+
+})
+
+
+it("Product Sorting Using Dropdown and validating", () => {
+
+  cy.searchProduct("Phone");
+  cy.wait(2000);
+
+  cy.get("#products-orderby").select("Price: Low to High")
+  cy.wait(1000);
+  cy.get("#products-orderby").should("contain","Price: Low to High")
+
+
+  cy.xpath("//select[@id='products-orderby']").select("Name: Z to A");
+  cy.wait(1000);
+  cy.get("#products-orderby").should("contain","Name: Z to A")
+
+  cy.get("#products-orderby").select("Price: High to Low");
+  cy.wait(1000);
+  cy.get("#products-orderby").should("contain","Price: High to Low")
+
+  cy.get("#products-orderby").select("Created on");
+  cy.wait(1000);
+  cy.get("#products-orderby").should("contain","Created on")
+})
+
+
+// /*Product Details
+// Validate that product detail pages display accurate information
+// Test the functionality of the 'Add to Cart' button
+// */
+
+
+it("Validating the search result and checking functionality of add to cart button",()=>{
+
+  cy.visit("https://demowebshop.tricentis.com/");
+
+  cy.get(".cart-qty").should("have.text", '(0)');
+  
+  cy.searchProduct("Phone");
+  cy.get(':nth-child(3) > .product-item > .details > .product-title > a').click();
+  cy.get('.product-name').should("contain","Smartphone");
+  cy.get('.price-value-43').should("be.visible");  
+  cy.get('#addtocart_43_EnteredQuantity').clear().type(2);
+  cy.get('#add-to-cart-button-43').click();
+
+
+  cy.searchProduct("jean");
+  cy.get('.product-title > a').click();
+  cy.get("h1[itemprop='name']").should("contain","Blue Jeans");
+  cy.get(".price-value-36").should("be.visible");
+  cy.get("#addtocart_36_EnteredQuantity").clear().type(3);
+  cy.get('#add-to-cart-button-36').click();
+
+  cy.get(".cart-qty").should("have.text", '(5)');
+
+
+})
+
+
+// /*
+// Cart Management
+// ◦ Add items to the cart
+// ◦ Remove items from the cart
+// ◦ Verify cart total 
+// */
+
+
+it("Adding A Product to Cart", () => {
+ 
+  cy.get(".cart-qty").should("have.text", '(5)');
+
+
+  cy.searchProduct("14.1-inch Laptop")
+  cy.addToCart()
+  cy.wait(1000);
+
+  cy.get(".cart-qty").should("have.text", '(6)');
+
+})
+
+it("Clearing All items in cart", () => {
+
+  cy.xpath("//span[normalize-space()='Shopping cart']").click()
+  cy.xpath("//div[@class='order-summary-content']").then(($summary) => {
+    if ($summary.text().includes("Your Shopping Cart is empty!")) {
+      cy.log("Cart is already empty");
+    } else {
+      cy.get('.remove-from-cart > input').check({force: true});
+      cy.get('.update-cart-button').click({force: true});
+      cy.get('.header-logo > a > img').click();
+    }
+  });
+  cy.get(".cart-qty").should("have.text", '(0)');
+
+});
+
+
+it("Adding Different Products to Cart",()=>{
+
+// Adding products by searching them
+cy.searchProduct("Heart")
+cy.addToCart()
+
+cy.searchProduct("book")
+cy.addToCart()
+
+cy.searchProduct("jean")
+cy.addToCart()
+
+// Adding Products by clicking on the categories
+
+  cy.get('.top-menu > :nth-child(4) > a').click();
+  cy.get(':nth-child(3) > .product-item > .details > .add-info > .buttons > .button-2').click();
+  cy.get('.top-menu > :nth-child(4) > a').click();
+  cy.get(':nth-child(4) > .product-item > .details > .add-info > .buttons > .button-2').click();
+  cy.get('.top-menu > :nth-child(3) > [href="/electronics"]').click();
+  cy.get(':nth-child(2) > .sub-category-item > .picture').click();
+  cy.get(':nth-child(1) > .product-item > .details > .add-info > .buttons > .button-2').click();
+
+  cy.get('.top-menu > :nth-child(1)').click();
+  cy.get(':nth-child(1) > .product-item > .details > .add-info > .buttons > .button-2').click(); 
+  cy.get(':nth-child(3) > .product-item > .details > .add-info > .buttons > .button-2').click();
+  cy.wait(2000);
+
+  cy.get('.top-menu > :nth-child(5) > a').click();
+  cy.get(':nth-child(1) > .product-item > .details > .add-info > .buttons > .button-2').click();
+
+})
+  
+
+it("Opening Cart and Removing few items from Cart",()=>{
+
+cy.xpath("//span[normalize-space()='Shopping cart']").should("exist").and("be.visible");
+cy.wait(200);
+cy.xpath("//span[normalize-space()='Shopping cart']").click();
+cy.get(':nth-child(2) > .remove-from-cart > input').check();
+cy.get(':nth-child(3) > .remove-from-cart > input').check();
+cy.get(':nth-child(6) > .remove-from-cart > input').check();
+
+cy.get("input[value='Update shopping cart']").click();
+cy.get("img[alt='Tricentis Demo Web Shop']").click();
+
+})
+
+it("Verify Cart Total", () => {
+  cy.xpath("//span[normalize-space()='Shopping cart']").click();
+  cy.get(".cart-qty").should("have.text", '(4)');
+});
+
+// /*Checkout Process
+// ◦ Test the checkout process with valid payment information
+// ◦ Verify order confirmation and summary */
+
+it("Check Out Page",()=>{
+
+  cy.visit("https://demowebshop.tricentis.com/");
+  cy.xpath("//span[normalize-space()='Shopping cart']").click();
+  cy.xpath("//tbody").should("be.visible");
+
+  cy.get(".product-name").then($cartProducts => {
+  cy.log("Cart products:", $cartProducts.text());   
+
+// Adding Coupon
+
+  cy.get("div[class='coupon-box'] strong").should("be.visible");
+  cy.xpath("//input[@name='discountcouponcode']").should("be.visible")
+  .and("exist");
+  cy.xpath("//input[@name='discountcouponcode']").type("12345");
+  cy.get('.coupon-box > .coupon-code > .button-2').click();
+  cy.xpath("//div[@class='message']").should("be.visible");
+
+// Adding Gift Card
+
+  cy.xpath("//strong[normalize-space()='Gift Cards']").should("be.visible");
+  cy.get('.gift-card-coupon-code').should("be.visible");
+  cy.get(".gift-card-coupon-code").type("ABCDE");
+  cy.get("input[value='Add gift card']").click();
+  cy.xpath("//div[@class='message']").should('be.visible');
+
+  // check estimate shipping
+
+  cy.get(".shipping").should("be.visible");
+  cy.get("#CountryId").type("India{enter}");
+  cy.get("#StateProvinceId").select("Other (Non US)");
+  cy.get("#ZipPostalCode").clear();
+  cy.get("#ZipPostalCode").type(530008);
+  cy.get("input[value='Estimate shipping']").click();
+  cy.get(".shipping-results").should("be.visible");
+
+// checking Price
+
+cy.get(':nth-child(4) > .cart-total-right').should("be.visible");
+cy.xpath("//button[@id='checkout']").should("be.exist");
+cy.xpath("//button[@id='checkout']").click();
+cy.xpath("//div[@id='terms-of-service-warning-box']").should("be.visible");
+cy.wait(2000);
+cy.xpath("//span[@class='ui-button-icon-primary ui-icon ui-icon-closethick']").click();
+cy.xpath("//input[@id='termsofservice']").check();
+cy.xpath("//button[@id='checkout']").click();
+
+// Adding New Billing Address
+
+cy.get("#billing-address-select").should("be.visible");
+cy.get("#billing-address-select").select("New Address");
+cy.get('#BillingNewAddress_CountryId').select("India");
+cy.xpath("//select[@id='BillingNewAddress_StateProvinceId']").type("other{enter}")
+cy.get("#BillingNewAddress_City").type("visakhapatnam");
+cy.get("#BillingNewAddress_Address1").type("Kancharapalem, Visakhapatnam, Andhra Pradesh");
+cy.get("#BillingNewAddress_ZipPostalCode").type(530008);
+cy.get("input[onclick='Billing.save()']").click();
+// Error 
+cy.get(".field-validation-error").should("be.visible");
+cy.xpath("//input[@id='BillingNewAddress_PhoneNumber']").type(9398084451);
+cy.get("input[onclick='Billing.save()']").click();
+
+//Shippinng Address
+
+cy.get("#shipping-address-select").should("be.visible");
+cy.get("#PickUpInStore").check().should("be.checked");
+cy.get("input[onclick='Shipping.save()']").click();
+
+//Inspecting All Payment Method
+
+cy.xpath("//div[@id='checkout-step-payment-method']").should("be.visible");
+
+//Check / Money Order
+cy.get("#paymentmethod_1").click();
+cy.get("input[class='button-1 payment-method-next-step-button']").click();
+cy.get('#payment-info-buttons-container > .back-link > a').click();
+cy.wait(1000)
+
+// Credit Card
+cy.get("#paymentmethod_2").click();
+cy.get("input[class='button-1 payment-method-next-step-button']").click();
+cy.get('#payment-info-buttons-container > .back-link > a').click();
+cy.wait(1000)
+
+// Purchase Order
+cy.get("#paymentmethod_3").click();
+cy.get("input[class='button-1 payment-method-next-step-button']").click();
+cy.get('#payment-info-buttons-container > .back-link > a').click();
+cy.wait(1000)
+
+// Cash On Delivery
+cy.get("#paymentmethod_0").click();
+cy.get("input[class='button-1 payment-method-next-step-button']").click();
+cy.wait(1000)
+cy.xpath("//div[@class='info']").should("be.visible");
+cy.get("input[class='button-1 payment-info-next-step-button']").click();
+
+// Checking products in cart page equal to products in checkout page
+cy.get(".order-review-data").should("be.visible");
+cy.xpath("//tbody").should("be.visible");
+
+cy.get(".product-name").then($checkoutProducts => {
+cy.log("Checkout products:", $checkoutProducts.text());
+expect($cartProducts.text()).to.equal($checkoutProducts.text());
+});
+
+// Verifying Details of Ordered Products 
+
+cy.get(".cart-total").should("be.visible");
+cy.get("input[value='Confirm']").click();
+cy.get("div[class='page-title'] h1").should("be.visible");;
+cy.get(".page-body.checkout-data").should("be.visible");
+cy.get('.details > :nth-child(2) > a').click();
+cy.get("div[class='page-title'] h1").should("be.visible");
+cy.get(".order-overview").should("be.visible");
+cy.get("img[alt='Tricentis Demo Web Shop']").click();
+  });
+});
+
+
+//LOGOUT
+it("Log Out",()=>{
+
+  cy.get(".ico-logout").should("be.exist").and("be.visible");
+  cy.xpath("//a[normalize-space()='Log out']").click();
+  // After Logout the header should show login option
+  cy.get(".ico-login").should("be.visible").and("exist");
+
+ })
+})
+
+
