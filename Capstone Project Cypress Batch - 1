@@ -14,7 +14,7 @@ describe('CAPSTONE PROJECT', () => {
     cy.get("#gender-male").check().should("be.checked");
     cy.xpath("//input[@id='FirstName']").type("Uday Sankar").should("have.value", "Uday Sankar");
     cy.get("#LastName").type("Daniboyina").should("have.value", "Daniboyina");
-    cy.xpath("//input[@id='Email']").type("Uday9398084@gmail.com");
+    cy.xpath("//input[@id='Email']").type("Udayteja9398084@gmail.com");
 // Password
     cy.get("#Password").should("be.visible").and("exist").type("Uday1211@");
     cy.xpath("//input[@id='ConfirmPassword']").should("be.visible").and("exist").type("Uday1211@");
