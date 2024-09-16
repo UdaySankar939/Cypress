@@ -1,0 +1,258 @@
+describe('CAPSTONE PROJECT 2', () => {
+
+
+//     // // Fixtures
+//   // let data;
+//   // before(()=>{
+//   //     cy.fixture("capstone").then((userdata)=>{
+//   //     data = userdata;
+//   //   })
+//   // })
+
+  it('Existing USer Registration', () => {
+    cy.visit('https://demo.x-cart.com/demo/home.php');
+    cy.xpath("//div[@class='header-links']//a[@href='register.php'][normalize-space()='Register']").should("be.visible");
+    cy.xpath("//div[@class='header-links']//a[@href='register.php'][normalize-space()='Register']").click();
+    cy.get("#firstname").type("Uday");
+    cy.get("#lastname").type("Sankar");
+    cy.get("#email").type("udaysankar12112000@gmail.com");
+    cy.get("#passwd1").type("Uday1211@");
+    cy.get("#passwd2").type("Uday1211@");
+    cy.get("input[name='subscription[2]']").check();
+    cy.get("input[name='subscription[1]']").check();
+    cy.get("#accept_terms_register").check();
+    cy.get("img[src='/demo/skin/common_files/images/spacer.gif']").should("be.visible");
+    cy.get("div[class='center'] span[class='button-left']").click();
+    cy.get(".box.ui-corner-bottom.message-e").should("be.visible")
+    cy.get(".box.ui-corner-bottom.message-e").should("contain","Email address already exists in the database!");
+  })
+
+  it('New USer Registration', () => {
+    cy.visit('https://demo.x-cart.com/demo/home.php');
+    cy.xpath("//div[@class='header-links']//a[@href='register.php'][normalize-space()='Register']").should("be.visible");
+    cy.xpath("//div[@class='header-links']//a[@href='register.php'][normalize-space()='Register']").click();
+    cy.get("#firstname").type("Uday");
+    cy.get("#lastname").type("Uday");
+    cy.get("#email").type("udaysan1211@gmail.com");
+    cy.get("#passwd1").type("Uday1211@");
+    cy.get("#passwd2").type("Uday1211@");
+    cy.get("input[name='subscription[2]']").check();
+    cy.get("input[name='subscription[1]']").check();
+    cy.get("#accept_terms_register").check();
+    cy.get("img[src='/demo/skin/common_files/images/spacer.gif']").should("be.visible");
+    cy.get("div[class='center'] span[class='button-left']").click();
+    cy.get(".box.ui-corner-bottom.message-i").should("contain","Profile has been successfully created");
+    cy.xpath("(//a[normalize-space()='Sign out'])[1]").click();
+    cy.xpath("//div[@class='header-links']//a[@id='href_Sign_in']").should("be.visible");
+  })
+
+
+it('Login', () => {
+cy.visit('https://demo.x-cart.com/demo/home.php');
+cy.get('.header-links > #href_Sign_in').click();
+ cy.wait(200);
+ cy.get("#username").clear().type("uday939808@gmail.com");
+ cy.get("#password").clear().type("Uday1211@");
+ cy.get('.button-row > .button > .button-right').click();
+ cy.get('.name').should("have.text","(Uday Sankar)");
+})
+
+
+it("Verify Home Page Title and URl",()=>{
+
+  cy.visit('https://demo.x-cart.com/demo/home.php');
+
+  cy.title().should("be.eq",'Your Company Name');
+  cy.title().should("include","Your").and("not.include","your");
+
+  cy.url().should("be.eq",'https://demo.x-cart.com/demo/home.php');
+  cy.url().should("include","demo");
+
+})
+
+
+it("Application Loading Functionality Checking",()=>{
+
+  cy.visit("https://demo.x-cart.com/demo/home.php");
+  cy.wait(200);
+  cy.get("img[alt='Your Company Name']").should("exist");
+  cy.get(".icon.ajax-minicart-icon").should("be.visible");
+  cy.xpath("//ul[@class='nav navbar-nav']//li//a[@href='cart.php'][normalize-space()='Shopping Cart']").click();
+  cy.get("#center-main").should("contain","Your shopping cart is empty");
+  cy.get("img[alt='Your Company Name']").click();
+  cy.xpath("//div[@class='header-links']//a[normalize-space()='Sign out']").should("be.visible");
+  cy.get(".footer-links").should("be.visible");
+  cy.get(".fa.fa-facebook-square").should("exist");
+  cy.get(".fa.fa-twitter-square").should("exist");
+
+})
+
+
+it('Searchin for  various products', () => {
+
+  cy.visit("https://demo.x-cart.com/demo/home.php");
+  cy.get('.nav > .current > a').click();
+  cy.get("div[class='line3'] input[placeholder='Enter keyword...']").type("Toys{enter}");
+  cy.get('.products').its('length').should('be.gt', 0);
+  cy.get("img[title='Albert Einstein Action Figure']").click();
+  cy.get('h1').should("have.text","Albert Einstein Action Figure");
+
+  cy.get("div[class='line3'] input[placeholder='Enter keyword...']").type("T Shirts{enter}");
+  cy.get('.products').its('length').should('be.gt', 0)
+  cy.get('.first > .item-box > .details > .product-title').should("be.visible");
+  cy.get('.first > .item-box > .details > .product-title').click();
+  cy.get('h1').should("have.text","Binary Mom [Product Variants Demo]");
+
+  cy.get("div[class='line3'] input[placeholder='Enter keyword...']").type("Mouse{enter}");
+  cy.get('.products').its('length').should('be.gt', 0);
+  cy.xpath("//img[@title='Genius Traveler 6000X Ambidextrous Mouse']").should("be.visible");
+  cy.xpath("//img[@title='Genius Traveler 6000X Ambidextrous Mouse']").click();
+  cy.get('h1').should("have.text","Genius Traveler 6000X Ambidextrous Mouse");
+
+  cy.get('.navbar > .nav > :nth-child(1) > a').click();
+})
+
+
+it("Categories",()=>{
+  cy.visit("https://demo.x-cart.com/demo/home.php");
+  cy.get('.fancycat-icons-scheme.fancycat-icons-e').should("be.visible");
+  
+  })
+  
+it("To change the Interface",()=>{
+    cy.visit("https://demo.x-cart.com/demo/home.php");
+    cy.get("img[alt='Your Company Name']").click();
+
+    cy.get("select[name='alt_skin']").select("Ideal Comfort");
+    cy.wait(2000);
+
+    cy.get("select[name='alt_skin']").select("Books & Magazines");
+    cy.wait(2000);
+
+    cy.get("select[name='alt_skin']").select("Ideal Responsive");
+    cy.wait(2000);
+
+    cy.get("select[name='alt_skin']").select("Light & Lucid (2-column)");
+    cy.wait(2000);
+
+    cy.get("select[name='alt_skin']").select("Light & Lucid (3-column)");
+    cy.wait(2000);
+
+    cy.get("select[name='alt_skin']").select("Light Responsive");
+    cy.wait(2000);
+
+  })
+
+
+  it("Verifying Contact Us Option",()=>{
+
+    cy.get('.navbar > .nav > :nth-child(3) > a').click();
+    cy.get("div[id='center-main'] h1").should("have.text","Contact us");
+    cy.get("img[alt='Your Company Name']").click();
+  })
+
+
+it("Adding Different Products to Cart", () => {
+  
+  cy.get(".minicart-items-value").should("have.text", '0');
+
+  cy.get("div[class='line3'] input[placeholder='Enter keyword...']").type("Head Phones{enter}");
+  cy.get('.first > .item-box > .details > .buttons-cell > .buy-now > form > .buttons-row > .main-button > .button-right > .button-left').click();
+  cy.get('.continue-shopping').click();
+  cy.get(".minicart-items-value").should("have.text", '1');
+
+  cy.get(':nth-child(3) > .item-box > .details > .buttons-cell > .buy-now > form > .buttons-row > .main-button > .button-right > .button-left').click();
+  cy.get('.continue-shopping').click();
+  cy.get(".minicart-items-value").should("have.text", '2');
+
+  cy.get('.line3 > .search > form > .text').clear().type("Mother Board{enter}");
+  cy.get('.first > .item-box > .details > .buttons-cell > .buy-now > form > .buttons-row > .main-button > .button-right > .button-left').click();
+  cy.get('.continue-shopping').click();
+  cy.get(".minicart-items-value").should("have.text", '3');
+
+  cy.get('.line3 > .search > form > .text').clear().type("Mouse{enter}");
+  cy.get('.first > .item-box > .details > .buttons-cell > .buy-now > form > .buttons-row > .main-button > .button-right > .button-left').click();
+  cy.get('.continue-shopping').click();
+  cy.get(".minicart-items-value").should("have.text", '4');
+
+  cy.get(':nth-child(2) > .item-box > .details > .buttons-cell > .buy-now > form > .buttons-row > .main-button > .button-right > .button-left').click();
+  cy.get('.continue-shopping').click();
+  cy.get(".minicart-items-value").should("have.text", '5');
+
+  cy.xpath("//a[normalize-space()='Books (7)']").click();
+  cy.wait(100);
+  cy.get('.first > .item-box > .details > .buttons-cell > .buy-now > form > .buttons-row > .main-button > .button-right > .button-left').click();
+  cy.get('.continue-shopping').click();
+  cy.get(".minicart-items-value").should("have.text", '6');
+
+});
+
+
+it("Removing few  Products from Cart and moving them to wishlist", () => {
+
+  cy.get('.logo').click();
+  cy.xpath("//ul[@class='nav navbar-nav']//li//a[@href='cart.php'][normalize-space()='Shopping Cart']").click();
+
+  cy.get('.first > tbody > tr > .details > .buttons-row > .wl-button > .button-right').click();
+  cy.get('[summary="Apple Wireless Mighty Mouse"] > tbody > tr > .details > .buttons-row > .wl-button > .button-right').click();
+  cy.get('.last > tbody > tr > .details > .buttons-row > .wl-button > .button-right').click();
+
+  cy.get(".minicart-items-value").should("have.text", '3');
+})
+
+
+it("Gift Wrap",()=>{
+
+  cy.get("img[alt='Your Company Name']");
+  cy.xpath("//ul[@class='nav navbar-nav']//li[@class='current']//a[@href='cart.php'][normalize-space()='Shopping Cart']").click();
+  cy.get(".products.cart").should("be.visible");
+  cy.get('#need_giftwrap').check();
+  cy.get("textarea[name='giftwrap_message']").type("Hello. Hope this gift will make you happy.");
+  cy.xpath("//span[contains(text(),'Update gift wrap')]").click();
+})
+
+it("Apply Coupon",()=>{
+
+  cy.get("#coupon").should("exist");
+  cy.get("#coupon").type(123456);
+  cy.get('.add-coupon > form > .button > .button-right > .button-left').click();
+  cy.get("#ui-id-2").should("be.visible");
+  cy.get("button[class='ui-button ui-corner-all ui-widget']").click();
+})
+
+it("Adding New Address",()=>{
+  cy.get('.checkout-3-button > a').should("be.visible");
+  cy.get('.checkout-3-button > a').click();
+  //cy.get("div[id='opc_profile'] h2").should("be.visible");
+  cy.get("#new_B").check();
+  cy.get("#b_firstname").clear().type("Uday");
+  cy.get("#b_lastname").clear().type("Sankar");
+  cy.get("#b_address").clear().type("Room No:- 33, Kancharapalem");
+  cy.get("#b_city").clear().type("Visakhapatnam");
+  cy.get("#b_country").type("India{enter}");
+  cy.get('#address_book_B_state').type("Andhra{enter}");
+  cy.get("#b_zipcode").clear().type(53008);
+  cy.get("#b_phone").clear().type(9398084451);
+  cy.get("#email").clear().type("uday939808@gmail.com");
+  cy.get("button[title='Save'] span[class='button-left']").click();
+
+  //cy.get('.opc-checkout-profile > .opc-section-container').should("be.visible");
+})
+
+it("Customer Notes",()=>{
+  cy.get(".opc-checkout-profile").should("be.visible");
+  cy.get("form[name='shippingsform']").should("exist");
+  cy.get(':nth-child(1) > .checkout-payment-name').click();
+  cy.get("#opc_totals").should("be.visible");
+
+  cy.get("#customer_notes").type("Get Well Soon");
+  cy.get("#accept_terms").check();
+  cy.get(".button-left").click();
+})
+
+  it("Confirmation Page and Invoice",()=>{
+  cy.get(".text-block").should("be.visible");
+  cy.get(".order-invoice.width-100").should("be.exist");
+  cy.get("a[onclick='javascript: if (event) event.cancelBubble = true;']").click();
+})
+})
